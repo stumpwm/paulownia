@@ -1,0 +1,14 @@
+* Codename: Paulownia
+StumpWM's codebase while stable is showing its age.  Furthermore there
+have been recent developments in the common lisp ecosystem that
+stumpwm has been insulated from.  
+
+This is an attempt to modernize the stumpwm codebase while fixing some
+of stumpwm's Achilles heels. 
+** Design Goals
+- Test driven design. Unit tests that matter (using [[https://github.com/fukamachi/prove][prove]])
+- Re-use as much code from stumpwm as possible
+- Support for non-ascii input
+- Utilize existing libraries rather than re-implementing subsets of
+  existing functionality
+
