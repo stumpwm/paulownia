@@ -6,9 +6,28 @@ stumpwm has been insulated from.
 This is an attempt to modernize the stumpwm codebase while fixing some
 of stumpwm's Achilles heels. 
 ** Design Goals
-- Test driven design. Unit tests that matter (using [[https://github.com/fukamachi/prove][prove]])
-- Re-use as much code from stumpwm as possible
+(From achievable to lofty)
+- Test driven design. Unit tests that matter
+- Re-use as much code from stumpwm as possible, don't reinvent the
+  wheel unless its broken
 - Support for non-ascii input
 - Utilize existing libraries rather than re-implementing subsets of
   existing functionality
+- Tighter emacs integration
+- Support for multiple backends (wayland, mir, X11)
+** Technology
+- [[roswell]] for building/deploying
+- [[https://github.com/fukamachi/prove][prove]] for unit testing
+- travis-ci for cloud CI testing
+- [[https://shinmera.github.io/qtools/][qtools]] for gui components
+- various packages carved out of the stumpwm codebase and re-packaged
+  for quicklisp distribution
+* Why Paulownia?
+It seems like a strange name, stumpwm reminds me of a tree stump, the
+idea behind this is to burn stumpwm to the ground and grow it back up
+stronger and better than before.  If you google [[https://www.google.com/search?q%3Dphoenix%2Btree][phoenix tree]], the top
+hit is the wiki page describing the genus Paulownia. The wiki page
+actually draws a lot of analogies to the goals of this project, so the
+name was chosen.
+
 
