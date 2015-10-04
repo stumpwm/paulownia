@@ -1,0 +1,40 @@
+LISP=@LISP@
+
+datarootdir = @datarootdir@
+prefix=@prefix@
+exec_prefix= @exec_prefix@
+bindir=@bindir@
+infodir=@infodir@
+
+# You shouldn't have to edit past this
+
+FILES=paulownia.asd $(shell grep -o ":file \".*\"" paulownia.asd | sed 's,:file ",,g' | sed 's,",.lisp,g' )
+
+all: paulownia # paulownia.info
+
+paulownia.info: paulownia.texi
+	makeinfo paulownia.texi
+
+paulownia: $(FILES) paulownia.ros
+	ros use $(LISP)
+	ros build paulownia.ros
+
+clean:
+	rm -f *.fasl *.fas *.lib *.*fsl
+	rm -f *.log *.fns *.fn *.aux *.cp *.ky *.log *.toc *.pg *.tp *.vr *.vrs
+	rm -f paulownia paulownia.texi paulownia.info
+
+install: paulownia.info paulownia
+	test -z "$(destdir)$(bindir)" || mkdir -p "$(destdir)$(bindir)"
+	install -m 755 paulownia "$(destdir)$(bindir)"
+	test -z "$(destdir)$(infodir)" || mkdir -p "$(destdir)$(infodir)"
+	install -m 644 paulownia.info "$(destdir)$(infodir)"
+	install-info --info-dir="$(destdir)$(infodir)" "$(destdir)$(infodir)/paulownia.info"
+install-modules:
+	git clone https://github.com/paulownia/stumpwm-contrib.git ~/.paulownia.d/modules
+uninstall:
+	rm "$(destdir)$(bindir)/paulownia"
+	install-info --info-dir="$(destdir)$(infodir)" --remove "$(destdir)$(infodir)/paulownia.info"
+	rm "$(destdir)$(infodir)/paulownia.info"
+
+# End of file

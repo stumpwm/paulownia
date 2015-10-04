@@ -1,0 +1,15 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(asdf:initialize-source-registry
+ '(:source-registry
+   (:directory "@PAULOWNIA_ASDF_DIR@")
+   :inherit-configuration))
+
+(asdf:oos 'asdf:load-op 'paulownia)
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (paulownia:paulownia argv))

@@ -1,0 +1,109 @@
+#+TITLE: Jet Charge in W+Jets
+#+OPTIONS:     H:5 num:nil toc:nil \n:nil @:t ::t |:t ^:t f:t TeX:t
+* Entries
+** <2015-10-04 Sun> Introduction
+I'm re-writing StumpWM.  Since I have infrastructure in place to parse
+org files and produce posts from a file like this I thought I would
+keep a log of what I've been doing and maybe expand them into
+pedagogical posts about how to build a more complex lisp project in
+the 2010's (as opposed to the 90's or earlier).
+
+StumpWM built a lot of infrastructure that has been re-implemented
+outside of StumpWM's ecosystem.  In a re-write such as the one I'm
+doing this leaves two options:
+1. Keep the existing infrastructure and spin it out into their own
+   projects for the benefit of others
+2. Replace parts of the infrastructure with external options
+
+One of StumpWM's original selling points was its lack of
+dependencies.  This is a blessing and a curse, and in order to make
+StumpWM more lean and focused on managing windows, I've decided to
+introduce dependencies. 
+
+I struggled with this decision for a long time, but ultimately decided
+that it was appropriate since with the advent of quicklisp
+dependencies are easy to obtain, and those who are building from
+source should know what their doing. If a user is installing from a
+package manager, then the dependencies are already managed by other
+software.  This wasn't the case when StumpWM originally came on the
+scene, and then installing and loading dependencies for lisp systems
+required much more expertise.
+
+Going forward, option 2 when possible, and option 1 when no better
+alternative exists.
+
+As for the rest of the goals, they can be found in the project
+README.org.
+** <2015-10-04 Sun> Roswell 
+Roswell is a neat little lisp implementation manager that provides
+(among other things) a uniform interface for interacting with
+different lisp implementations as well as the ability to dump images
+of lisp-scripts.  This replaces StumpWM's =make-image.lisp= and
+=load-image.lisp= (and all their implementation specific hacks).
+
+Getting roswell is as easy as (note the release branch to ensure we
+get a stable version):
+#+BEGIN_SRC sh
+git clone -b release https://github.com/snmsts/roswell.git
+#+END_SRC
+then we can use the industry standard "=./configure; make; make
+install=" process:
+#+BEGIN_SRC sh
+sh bootstrap
+./configure --prefix=${HOME}/local
+make 
+make install
+#+END_SRC
+I prefer =${HOME}/local= to =${HOME}/.local= because other programs
+use =.local= and I can keep track of what I've added vs what other
+programs have added themselves. This is purely a matter of taste.  Of
+course it also assumes that =${HOME}/local= is in your path.
+
+Interestingly roswell is a mixture of C and Common Lisp.  It handles
+downloading and installing lisp implementations and it comes with
+recipes for the various Continuous Integration cloud suites that have
+been popping up (travis-ci, circlci, etc).  So with roswell installed,
+installing =sbcl= and =ccl= is matter of:
+#+BEGIN_SRC sh
+ros install sbcl-bin
+ros install ccl-bin
+#+END_SRC
+
+There are examples of how to get going from here on the wiki and in
+the project's [[https://github.com/snmsts/roswell][readme]].  
+
+The command =ros init paulownia= will produce file that defines a main
+for our program.  Here's a first practical problem that needs to be
+solved, namely how do we load the rest of our system into the main
+file? If this was a simple script we could just
+=(ql:quickload :paulownia)= but this would require that we tell
+quicklisp where to find our source tree.  Since quicklisp
+intelligently wraps a call to asdf, we can dispense with quicklisp
+entirely and write:
+#+BEGIN_SRC lisp
+  (setf asdf:*central-registry* (list* #P"/home/dave/paulownia/" 
+                                       asdf:*central-registry*))
+  (asdf:operate 'asdf:load-op 'paulownia)
+#+END_SRC
+This works great except that the path is hard-coded.  That's where the
+=autoconf= comes in, it processes =.ac= =.in= files and produces a
+system that can be built using the make tools.  
+
+So far my =paulownia.ros.in= file contains:
+#+BEGIN_SRC lisp
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(asdf:initialize-source-registry
+ '(:source-registry
+   (:directory "@PAULOWNIA_ASDF_DIR@")
+   :inherit-configuration))
+
+(asdf:oos 'asdf:load-op 'paulownia)
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (paulownia:paulownia argv))
+#+END_SRC
