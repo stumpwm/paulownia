@@ -30,7 +30,7 @@ HAS_CCL="$(ros list installed | awk '{print $1}' | grep ccl)"
 
 if test "x$LISP" = "xany"; then
    if test "x$HAS_SBCL"="xsbcl-bin"; then
-      LISP=sbcl
+      LISP=sbcl-bin
    elif test "x$HAS_CCL"="xccl-bin"; then
       LISP=ccl
    fi

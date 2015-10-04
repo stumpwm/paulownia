@@ -27,7 +27,7 @@ before_script:
   - ros config
   - ros run -- --version
   - ./autogen.sh
-  - ./configure
+  - ./configure --with-lisp=$LISP
 script:
   - make
   - make tests
