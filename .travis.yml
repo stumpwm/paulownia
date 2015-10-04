@@ -10,7 +10,7 @@ env:
     - ROSWELL_BRANCH=master
     - ROSWELL_INSTALL_DIR=${HOME}/.roswell
   matrix:
-    - LISP=sbcl-bin
+    - LISP=sbcl
     - LISP=ccl-bin
 install:
     - curl -L https://raw.githubusercontent.com/snmsts/roswell/$ROSWELL_BRANCH/scripts/install-for-ci.sh | sh
