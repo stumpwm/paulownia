@@ -10,13 +10,12 @@ env:
     - ROSWELL_BRANCH=release
     - ROSWELL_INSTALL_DIR=${HOME}/.roswell
   matrix:
-    - LISP=sbcl-bin
-    - LISP=ccl-bin
+    - LISP=sbcl
+    - LISP=ccl
 install:
     - if ! $(which ros >/dev/null); then
         curl -L https://raw.githubusercontent.com/snmsts/roswell/$ROSWELL_BRANCH/scripts/install-for-ci.sh | sh;
       else
-        ros install $LISP
         ros -e '(ql:update-all-dists :prompt nil)';
       fi
     - ros install $LISP
