@@ -22,5 +22,3 @@
   (:use :cl)
   (:shadow #:yes-or-no-p #:y-or-n-p))
 
-(defpackage :paulownia-user
-  (:use :cl :paulownia))

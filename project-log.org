@@ -107,3 +107,30 @@ exec ros -Q -- $0 "$@"
   (declare (ignorable argv))
   (paulownia:paulownia argv))
 #+END_SRC
+
+Now, with the appropriate =Makefile= recipe:
+#+BEGIN_EXAMPLE
+paulownia: $(FILES) paulownia.ros
+	ros use $(LISP)
+	ros build paulownia.ros
+#+END_EXAMPLE
+We're in business.  
+** <2015-10-04 Sun> Adding a testing framework
+I've settled on [[https://github.com/fukamachi/prove][prove]] as the testing framework for StumpWM. Getting it
+going was harder than anticipated.  Prove provides a ros script
+=run-prove= that processes a list of asd files and runs the testing
+packages defined in them.  I kept getting a stack trace saying:
+#+BEGIN_EXAMPLE
+Unhandled ASDF/FIND-SYSTEM:MISSING-COMPONENT in thread #<SB-THREAD:THREAD
+                                                         "main thread" RUNNING
+                                                          {10039CEE33}>:
+  Component "paulownia-tests" not found
+
+#+END_EXAMPLE
+I could not figure this out until I desperately renamed my system from
+=paulownia-test= to =paulownia-tests=.  Then I remembered that =asd=
+files must define a system with the same name as the file.  Anyway,
+this worked, but I still needed to tell =asdf= where to find
+paulownia, so I ended up making a =paulownia-tests.asd.in= and added
+the correct call in the configure.ac file.  Now I can go from an empty
+repo to testing and I'm ready to get the travis build going.

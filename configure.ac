@@ -58,3 +58,4 @@ fi
 # Checks for library functions.
 AC_OUTPUT(Makefile)
 AC_OUTPUT(paulownia.ros)
+AC_OUTPUT(paulownia-tests.asd)

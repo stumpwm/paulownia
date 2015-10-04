@@ -1,0 +1,20 @@
+(in-package :cl-user)
+(defpackage paulownia-test-asd
+  (:use :cl :asdf))
+(in-package :paulownia-test-asd)
+
+(asdf:initialize-source-registry
+ '(:source-registry
+   (:directory "@PAULOWNIA_ASDF_DIR@")
+   :inherit-configuration))
+
+(defsystem paulownia-tests
+  :depends-on (:paulownia
+               :prove)
+  :components ((:module "tests/"
+                :components ((:test-file "paulownia"))))
+
+  :defsystem-depends-on (:prove-asdf)
+  :perform (test-op :after (op c)
+                    (funcall (intern #.(string :run-test-system) :prove.asdf) c)
+                    (asdf:clear-system c)))
