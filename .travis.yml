@@ -10,15 +10,11 @@ env:
     - ROSWELL_BRANCH=master
     - ROSWELL_INSTALL_DIR=${HOME}/.roswell
   matrix:
-    - LISP=sbcl
-    - LISP=ccl
+    - LISP=sbcl-bin
+    - LISP=ccl-bin
 install:
-    - if ! $(which ros >/dev/null); then
-        curl -L https://raw.githubusercontent.com/snmsts/roswell/$ROSWELL_BRANCH/scripts/install-for-ci.sh | sh;
-      else
-        ros -e '(ql:update-all-dists :prompt nil)';
-      fi
-    - ros install $LISP
+    - curl -L https://raw.githubusercontent.com/snmsts/roswell/$ROSWELL_BRANCH/scripts/install-for-ci.sh | sh
+    - ros -e '(ql:update-all-dists :prompt nil)'
     - ros install prove
 cache:
   directories:
@@ -26,6 +22,8 @@ cache:
     - $HOME/.config/common-lisp
 before_script:
   - ros run -- --version
+  - ros --version
+  - ros config
   - ./autogen.sh
   - ./configure
 script:
