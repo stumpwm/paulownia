@@ -1,4 +1,5 @@
 * Codename: Paulownia
+[[https://travis-ci.org/stumpwm/paulownia.svg]]
 StumpWM's codebase while stable is showing its age.  Furthermore there
 have been recent developments in the common lisp ecosystem that
 stumpwm has been insulated from.  
