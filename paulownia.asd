@@ -1,7 +1,7 @@
 ;;; -*- Mode: Lisp -*-
 
 (defpackage :paulownia-system
-  (:use :cl :asdf))
+  (:use :cl :asdf :uiop))
 (in-package :paulownia-system)
 
 (defsystem :paulownia
@@ -12,7 +12,8 @@
   :license "GNU General Public License"
   :description "A tiling, keyboard driven window manager" 
   :serial t
-  :depends-on (:cl-ppcre #+sbcl :sb-posix)
+  :depends-on (:cl-ppcre #+sbcl :sb-posix
+			 :uiop)
   :components ((:file "package")
 	       (:file "paulownia")
                ;; keep this last so it always gets recompiled if
