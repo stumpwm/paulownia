@@ -134,3 +134,9 @@ this worked, but I still needed to tell =asdf= where to find
 paulownia, so I ended up making a =paulownia-tests.asd.in= and added
 the correct call in the configure.ac file.  Now I can go from an empty
 repo to testing and I'm ready to get the travis build going.
+
+** <2015-10-04 Sun> Integrating with travis-ci
+Now that I've got the configure script working, the unit testing
+framework going, and the roswell build in place, its time to
+incorporate travis-ci to put the build verification and all the
+wonderful little badges in the readme.  

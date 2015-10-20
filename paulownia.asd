@@ -12,11 +12,17 @@
   :license "GNU General Public License"
   :description "A tiling, keyboard driven window manager" 
   :serial t
-  :depends-on (:cl-ppcre #+sbcl :sb-posix
-			 :uiop)
+  :depends-on (:cl-ppcre 
+	       #+sbcl :sb-posix
+	       :uiop)
   :components ((:file "package")
+	       (:file "backends/display-server")
+	       (:file "backends/gui")
+	       (:file "base/timers")
+	       (:file "base/hooks")
 	       (:file "paulownia")
                ;; keep this last so it always gets recompiled if
                ;; anything changes
-               (:file "version")))
+               (:file "version")
+	       ))
 

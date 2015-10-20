@@ -7,7 +7,9 @@ exec ros -Q -- $0 "$@"
  '(:source-registry
    (:directory "@PAULOWNIA_ASDF_DIR@")
    :inherit-configuration))
-
+(setf asdf:*central-registry*
+      (append (list (merge-pathnames "@PAULOWNIA_ASDF_DIR@/base/"))
+	      asdf:*central-registry*))
 (asdf:oos 'asdf:load-op 'paulownia)
 
 (defun main (&rest argv)

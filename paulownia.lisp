@@ -32,4 +32,5 @@ further up. "
         (values t nil nil))))
 
 (defun paulownia (&optional args)
+  (format t "~a ~a" *timer-list* (get-next-timeout *timer-list*))
   (format t "~{ ~a ~} ~%" args))
