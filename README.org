@@ -1,5 +1,5 @@
 * Codename: Paulownia
-[[https://travis-ci.org/stumpwm/paulownia.svg?branch%3Dmaster][https://travis-ci.org/stumpwm/paulownia.svg?branch=master]]
+[[https://travis-ci.org/stumpwm/paulownia][https://travis-ci.org/stumpwm/paulownia.svg?branch=master]]
 
 StumpWM's codebase while stable is showing its age.  Furthermore there
 have been recent developments in the common lisp ecosystem that
