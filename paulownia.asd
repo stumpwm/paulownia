@@ -14,12 +14,14 @@
   :serial t
   :depends-on (:cl-ppcre 
 	       #+sbcl :sb-posix
-	       :uiop)
+	       :uiop
+	       :clx)
   :components ((:file "package")
 	       (:file "backends/display-server")
 	       (:file "backends/gui")
 	       (:file "base/timers")
 	       (:file "base/hooks")
+	       (:file "base/data-dir")
 	       (:file "paulownia")
                ;; keep this last so it always gets recompiled if
                ;; anything changes

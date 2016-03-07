@@ -20,6 +20,7 @@ paulownia: $(FILES) paulownia.ros
 	ros build paulownia.ros
 tests: paulownia-tests.asd
 	run-prove $^
+	@echo "\nDone!"
 clean:
 	rm -f *.fasl *.fas *.lib *.*fsl
 	rm -f *.log *.fns *.fn *.aux *.cp *.ky *.log *.toc *.pg *.tp *.vr *.vrs

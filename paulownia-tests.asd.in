@@ -12,7 +12,9 @@
   :depends-on (:paulownia
                :prove)
   :components ((:module "tests/"
-                :components ((:test-file "paulownia"))))
+			:components ((:test-file "paulownia")
+				     (:test-file "base/hooks")
+				     (:test-file "base/timers"))))
 
   :defsystem-depends-on (:prove-asdf)
   :perform (test-op :after (op c)

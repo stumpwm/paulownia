@@ -27,15 +27,36 @@
 
 #+ecl (require "clx")
 
-(export '(*suppress-abort-messages*
-          *suppress-frame-indicator*
-          *suppress-window-placement-indicator*
+(export '(*suppress-window-placement-indicator*
           *timeout-wait*
           *timeout-frame-indicator-wait*
+          *suppress-frame-indicator*
+	  ;; Frame settings
           *frame-indicator-text*
           *frame-indicator-timer*
+          *frame-number-map*
+          *min-frame-width*
+          *min-frame-height*
+          *new-frame-action*
+          *new-window-preferred-frame*
+          *root-click-focuses-frame*
+          ;; Frame accessors
+          frame-x
+          frame-y
+          frame-width
+          frame-height
+          define-frame-preference
+	  ;; Message settings
+	  *suppress-abort-messages*
           *message-window-timer*
-          *display*
+          *message-window-padding*
+          *message-window-gravity*
+          *max-last-message-size*
+          *suppress-deny-messages*
+          *startup-message*
+          command-mode-start-message
+          command-mode-end-message
+
           *shell-program*
           *maxsize-border-width*
           *transient-border-width*
@@ -43,8 +64,6 @@
           *text-color*
           *window-events*
           *window-parent-events*
-          *message-window-padding*
-          *message-window-gravity*
           *editor-bindings*
           *input-window-gravity*
           *normal-gravity*
@@ -52,7 +71,6 @@
           *transient-gravity*
           *top-level-error-action*
           *window-name-source*
-          *frame-number-map*
           *all-modifiers*
           *modifiers*
           *screen-list*
@@ -69,51 +87,32 @@
           *list-hidden-groups*
           *x-selection*
           *last-command*
-          *max-last-message-size*
           *record-last-msg-override*
           *suppress-echo-timeout*
           *run-or-raise-all-groups*
           *run-or-raise-all-screens*
           *deny-map-request*
           *deny-raise-request*
-          *suppress-deny-messages*
           *honor-window-moves*
           *resize-hides-windows*
-          *min-frame-width*
-          *min-frame-height*
-          *new-frame-action*
-          *new-window-preferred-frame*
-          *startup-message*
           *default-package*
           *window-placement-rules*
           *mouse-focus-policy*
-          *root-click-focuses-frame*
           *banish-pointer-to*
           *xwin-to-window*
           *resize-map*
           *default-group-name*
           *window-border-style*
-          *data-dir*
-          clear-window-placement-rules
+	  ;; Lisp utils
           concat
-          data-dir-file
-          dformat
           flatten
-          define-frame-preference
-          redirect-all-output
-          command-mode-start-message
-          command-mode-end-message
           split-string
-          with-restarts-menu
-          with-data-file
           move-to-head
           format-expand
+	  ;; Stumpwm utils
+          clear-window-placement-rules
+          dformat
 
-          ;; Frame accessors
-          frame-x
-          frame-y
-          frame-width
-          frame-height
 
           ;; Screen accessors
           screen-heads
@@ -193,8 +192,6 @@ be an integer.")
 
 ;; Data types and globals used by stumpwm
 
-(defvar *display* nil
-  "The display for the X server")
 
 (defvar *shell-program* "/bin/sh"
   "The shell program used by @code{run-shell-command}.")
@@ -516,22 +513,6 @@ loads the rc file.")
 (defvar *interactivep* nil
   "True when a defcommand is executed from colon or a keybinding")
 
-;;; The restarts menu macro
-
-(defmacro with-restarts-menu (&body body)
-  "Execute BODY. If an error occurs allow the user to pick a
-restart from a menu of possible restarts. If a restart is not
-chosen, resignal the error."
-  (let ((c (gensym)))
-    `(handler-bind
-         ((warning #'muffle-warning)
-          ((or serious-condition error)
-           (lambda (,c)
-             (restarts-menu ,c)
-             (signal ,c))))
-       ,@body)))
-
-
 ;; Misc. utility functions
 
 (defun conc1 (list arg)
@@ -658,23 +639,6 @@ output directly to a file.")
   "This variable Keeps track of the stream all output is sent to when
 `redirect-all-output' is called so if it changes we can close it
 before reopening.")
-
-(defun redirect-all-output (file)
-  "Elect to redirect all output to the specified file. For instance,
-if you want everything to go to ~/.stumpwm.d/debug-output.txt you would
-do:
-
-@example
-(redirect-all-output (data-dir-file \"debug-output\" \"txt\"))
-@end example
-"
-  (when (typep *redirect-stream* 'file-stream)
-    (close *redirect-stream*))
-  (setf *redirect-stream* (open file :direction :output :if-exists :append :if-does-not-exist :create)
-        *error-output*    *redirect-stream*
-        *standard-output* *redirect-stream*
-        *trace-output*    *redirect-stream*
-        *debug-stream*    *redirect-stream*))
 
 ;;; 
 ;;; formatting routines
@@ -1023,9 +987,6 @@ input focus is transfered to the window you click on.")
           (progn ,@body)
        (ungrab-keyboard))))
 
-(defvar *last-unhandled-error* nil
-  "If an unrecoverable error occurs, this variable will contain the
-  condition and the backtrace.")
 
 (defvar *show-command-backtrace* nil
   "When this is T a backtrace is displayed with errors that occurred
@@ -1055,24 +1016,6 @@ Like :tight but no border is ever visible.
 After changing this variable you may need to call
 sync-all-frame-windows to see the change.")
 
-(defvar *data-dir* nil
-  "The directory used by stumpwm to store data between sessions.")
-
-(defun data-dir-file (name &optional type)
-  "Return a pathname inside stumpwm's data dir with the specified name and type"
-  (ensure-directories-exist *data-dir*)
-  (make-pathname :name name :type type :defaults *data-dir*))
-
-(defmacro with-data-file ((s file &rest keys &key (if-exists :supersede) &allow-other-keys) &body body)
-  "Open a file in StumpWM's data directory. keyword arguments are sent
-directly to OPEN. Note that IF-EXISTS defaults to :supersede, instead
-of :error."
-  (declare (ignorable if-exists))
-  `(progn
-     (ensure-directories-exist *data-dir*)
-     (with-open-file (,s ,(merge-pathnames file *data-dir*)
-                         ,@keys)
-       ,@body)))
 
 (defmacro move-to-head (list elt)
    "Move the specified element in in LIST to the head of the list."
@@ -1095,17 +1038,6 @@ of :error."
   (:documentation "Adds a message slot to warning. Any stumpwm specific warning
   should inherit from this."))
 
-(defun intern1 (thing &optional (package *package*) (rt *readtable*))
-  "A DWIM intern."
-  (intern
-   (ecase (readtable-case rt)
-     (:upcase (string-upcase thing))
-     (:downcase (string-downcase thing))
-     ;; Prooobably this is what they want? It could make sense to
-     ;; upcase them as well.
-     (:preserve thing)
-     (:invert (string-downcase thing)))
-   package))
 
 (defun command-mode-start-message ()
   (message "Press C-g to exit command-mode."))

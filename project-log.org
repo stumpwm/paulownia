@@ -140,3 +140,12 @@ Now that I've got the configure script working, the unit testing
 framework going, and the roswell build in place, its time to
 incorporate travis-ci to put the build verification and all the
 wonderful little badges in the readme.  
+** <2016-03-07 Mon> Adding dependencies with roswell
+Since roswell containerizes the environment, you need to do:
+#+BEGIN_EXAMPLE
+ros run
+(ql:quickload :clx)
+#+END_EXAMPLE
+In order to get the =clx= depedency installed to the current lisp
+version used by roswell.  I'll update the build scripts to do this
+automagically.
