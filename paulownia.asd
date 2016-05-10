@@ -22,7 +22,6 @@
 	       (:file "base/timers")
 	       (:file "base/hooks")
 	       (:file "base/data-dir")
-	       (:file "paulownia")
                ;; keep this last so it always gets recompiled if
                ;; anything changes
                (:file "version")
