@@ -1,0 +1,188 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(asdf:initialize-source-registry
+ '(:source-registry
+   (:directory "/home/dave/paulownia")
+   :inherit-configuration))
+(setf asdf:*central-registry*
+      (append (list (merge-pathnames "/home/dave/paulownia/base/"))
+	      asdf:*central-registry*))
+(asdf:oos 'asdf:load-op 'paulownia)
+
+(in-package :paulownia)
+(export '(*last-unhandled-error*
+          *display*
+	  load-rc-file))
+(defvar *data-dir* nil
+  "The directory used by stumpwm to store data between sessions.")
+(defvar *display* nil
+  "The display for the X server")
+(defvar *last-unhandled-error* nil
+  "If an unrecoverable error occurs, this variable will contain the
+  condition and the backtrace.")
+(defparameter *mods*    '(:mod-1))
+(defparameter *move*    1)
+(defparameter *resize*  3)
+(defparameter *lower*   4)
+(defparameter *raise*   5)
+(defparameter *display* nil)            ; set this to an integer to do testing with xnest
+
+(defun error-handler (display error-key &rest key-vals &key asynchronous &allow-other-keys)
+  "Handle X errors"
+  (cond 
+    ;; ignore asynchronous window errors
+    ((and asynchronous
+          (find error-key '(xlib:window-error xlib:drawable-error xlib:match-error)))
+     ;; (dformat 4 "Ignoring error: ~s~%" error-key)
+     )
+    ((eq error-key 'xlib:access-error)
+     (write-line "Another window manager is running.")
+     (throw :top-level :quit))
+     ;; all other asynchronous errors are printed.
+     ;; (asynchronous
+     ;;  (message "Caught Asynchronous X Error: ~s ~s" error-key key-vals))
+     (t
+      (apply 'error error-key :display display :error-key error-key key-vals))))
+
+(defun load-rc-file (&optional (catch-errors t))
+  "Load the user's .paulowniarc file or the system wide one if that
+doesn't exist. Returns a values list: whether the file loaded (t if no
+rc files exist), the error if it didn't, and the rc file that was
+loaded. When CATCH-ERRORS is nil, errors are left to be handled
+further up. "
+  (let* ((xdg-config-dir
+	  (let ((dir (uiop:getenv "XDG_CONFIG_HOME")))
+	    (if (or (not dir) (string= dir ""))
+		(merge-pathnames  #p".config/" (user-homedir-pathname))
+		dir)))
+         (user-rc
+	  (probe-file (merge-pathnames #p".paulowniarc" (user-homedir-pathname))))
+         (dir-rc
+	  (probe-file (merge-pathnames #p".paulownia.d/init.lisp" (user-homedir-pathname))))
+         (conf-rc
+	  (probe-file (merge-pathnames #p"paulownia/config" xdg-config-dir)))
+         (etc-rc (probe-file #p"/etc/paulowniarc"))
+         (rc (or user-rc dir-rc conf-rc etc-rc)))
+    (if rc
+        (if catch-errors
+            (handler-case (load rc)
+              (error (c) (values nil (format nil "~a" c) rc))
+              (:no-error (&rest args) (declare (ignore args)) (values t nil rc)))
+            (progn
+              (load rc)
+              (values t nil rc)))
+        (values t nil nil))))
+
+(defun intern1 (thing &optional (package *package*) (rt *readtable*))
+  "A DWIM intern."
+  (intern
+   (ecase (readtable-case rt)
+     (:upcase (string-upcase thing))
+     (:downcase (string-downcase thing))
+     ;; Prooobably this is what they want? It could make sense to
+     ;; upcase them as well.
+     (:preserve thing)
+     (:invert (string-downcase thing)))
+   package))
+
+(defun parse-display-string (display)
+  "Parse an X11 DISPLAY string and return the host and display from it."
+  (ppcre:register-groups-bind (protocol host ('parse-integer display screen))
+			      ("^(?:(.*?)/)?(.*?)?:(\\d+)(?:\\.(\\d+))?" display :sharedp t)
+    (values 
+     ;; clx doesn't like (vector character *)
+     (coerce (or host "")
+	     '(simple-array character (*)))
+     display screen
+     (cond (protocol
+	    (intern1 protocol :keyword))
+	   ((or (string= host "")
+		(string-equal host "unix"))
+	    :local)
+	   (t :internet)))))
+(defun paulownia ()
+  (let* ((screen (first (xlib:display-roots *display*)))
+	 (root (xlib:screen-root screen)))
+    (dolist (button (list *move* *resize* *lower* *raise*))
+      (xlib:grab-button root button '(:button-press) :modifiers *mods*))
+
+    (unwind-protect
+	 (let (last-button last-x last-y)
+	   (do () (nil)                  ; infinite loop
+            (xlib:event-case (*display* :discard-p t)
+             (:button-press (code child)
+              (cond ((= code *raise*)
+                     (xlib:circulate-window-up root))
+                    ((= code *lower*)
+                     (xlib:circulate-window-down root))
+                    ((or (= code *move*)
+                         (= code *resize*))
+                     (when child        ; do nothing if we're not over a window
+                       (setf last-button code)
+                       (xlib:grab-pointer child '(:pointer-motion :button-release))
+                       (let ((lst (multiple-value-list (xlib:query-pointer root))))
+                         (setf last-x (sixth   lst)
+                               last-y (seventh lst)))))))
+             (:motion-notify
+              (event-window root-x root-y)
+              (cond ((= last-button *move*)
+                       (setf (xlib:drawable-x event-window) root-x
+                             (xlib:drawable-y event-window) root-y))
+                      ((= last-button *resize*)
+                       (setf (xlib:drawable-width event-window)
+                             (max 1 (- root-x (xlib:drawable-x event-window)))
+                             (xlib:drawable-height event-window)
+                             (max 1 (- root-y (xlib:drawable-y event-window)))))))
+             (:button-release ()
+              (xlib:ungrab-pointer *display*)))))
+      (xlib:close-display *display*))
+    )
+  )
+
+(defun main (&rest argv) 
+  (declare (ignorable argv))
+  "Start the window manager, this is the \"main\" of the program"
+  ;; Setup variables that need a global state for pauwlonia to run
+  ;; Setup the data directory for logging/modules
+  (setf *data-dir*
+	(make-pathname :directory (append (pathname-directory (user-homedir-pathname))
+					  (list ".paulownia.d"))))
+  ;; Setup the load-path for modules
+  ;; (init-load-path (merge-pathnames *data-dir* "modules/"))
+
+  ;; Start the top level loop.  We have to follow the standard unix
+  ;; interfaces and respond to events when we're suspended
+  ;; (hup-process)
+  (let ((display-str (car argv)))
+    (when (null display-str)
+      (setf display-str (uiop:getenv "DISPLAY")))
+    (format t "Opening display: ~a ~%" display-str)
+    (loop
+     (let ((ret (catch :top-level
+		  (multiple-value-bind (host display screen protocol) (parse-display-string display-str)
+
+		    (declare (ignore screen))
+		    (setf *display* (xlib:open-display host :display display :protocol protocol)
+			  (xlib:display-error-handler *display*) 'error-handler)
+		    (paulownia)))))
+       (setf *last-unhandled-error* nil)
+       (cond ((and (consp ret)
+		   (typep (first ret) 'condition))
+	      (format t "~&Caught '~a' at the top level. Please report this.~%~a" 
+		      (first ret) (second ret))
+	      (setf *last-unhandled-error* ret))
+	     ;; we need to jump out of the event loop in order to hup
+	     ;; the process because otherwise we get errors.
+	     ((eq ret :hup-process)
+	      (apply 'execv (first (list argv)) (list argv)))
+	     ((eq ret :restart))
+	     (t 
+	      (run-hook *quit-hook*)
+	      ;; the number is the unix return code
+	      (return-from main 0))))))
+  
+  
+  )
