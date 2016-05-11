@@ -5,7 +5,6 @@
 ;; framework available in common lisp
 (in-package :paulownia)
 (export '(message
-          with-restarts-menu
 	  ))
 
 (defgeneric message (control-string &rest args)

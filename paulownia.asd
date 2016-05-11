@@ -17,11 +17,14 @@
 	       :uiop
 	       :clx)
   :components ((:file "package")
-	       (:file "backends/display-server")
-	       (:file "backends/gui")
+	       (:file "base/helpers")
+	       (:file "base/debug")
+	       (:file "base/load-rc")
 	       (:file "base/timers")
 	       (:file "base/hooks")
 	       (:file "base/data-dir")
+	       (:file "backends/display-server")
+	       (:file "backends/gui")
                ;; keep this last so it always gets recompiled if
                ;; anything changes
                (:file "version")

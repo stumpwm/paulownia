@@ -1,3 +1,17 @@
+(in-package :paulownia)
+(export '(*data-dir*
+	  redirect-all-output
+	  data-dir-file
+	  with-data-file))
+
+(defvar *data-dir* nil
+  "The directory used by stumpwm to store data between sessions.")
+
+(defvar *redirect-stream* nil
+  "This variable Keeps track of the stream all output is sent to when
+`redirect-all-output' is called so if it changes we can close it
+before reopening.")
+
 (defun redirect-all-output (file)
   "Elect to redirect all output to the specified file. For instance,
 if you want everything to go to ~/.stumpwm.d/debug-output.txt you would
@@ -10,13 +24,10 @@ do:
   (when (typep *redirect-stream* 'file-stream)
     (close *redirect-stream*))
   (setf *redirect-stream* (open file :direction :output :if-exists :append :if-does-not-exist :create)
-        *error-output*    *redirect-stream*
-        *standard-output* *redirect-stream*
-        *trace-output*    *redirect-stream*
-        *debug-stream*    *redirect-stream*))
-
-(defvar *data-dir* nil
-  "The directory used by stumpwm to store data between sessions.")
+	*error-output*    *redirect-stream*
+	*standard-output* *redirect-stream*
+	*trace-output*    *redirect-stream*
+	*debug-stream*    *redirect-stream*))
 
 (defun data-dir-file (name &optional type)
   "Return a pathname inside stumpwm's data dir with the specified name and type"
@@ -31,5 +42,5 @@ of :error."
   `(progn
      (ensure-directories-exist *data-dir*)
      (with-open-file (,s ,(merge-pathnames file *data-dir*)
-                         ,@keys)
+			 ,@keys)
        ,@body)))
