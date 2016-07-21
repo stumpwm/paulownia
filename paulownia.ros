@@ -5,10 +5,10 @@ exec ros -Q -- $0 "$@"
 |#
 (asdf:initialize-source-registry
  '(:source-registry
-   (:directory "/home/dave/paulownia")
+   (:directory "/home/ereslibre/projects/paulownia")
    :inherit-configuration))
 (setf asdf:*central-registry*
-      (append (list (merge-pathnames "/home/dave/paulownia/base/"))
+      (append (list (merge-pathnames "/home/ereslibre/projects/paulownia/base/"))
 	      asdf:*central-registry*))
 (asdf:oos 'asdf:load-op 'paulownia)
 
@@ -64,7 +64,7 @@ exec ros -Q -- $0 "$@"
     )
   )
 
-(defun main (&rest argv) 
+(defun main (&rest argv)
   (declare (ignorable argv))
   "Start the window manager, this is the \"main\" of the program"
   ;; Setup variables that need a global state for pauwlonia to run
@@ -93,7 +93,7 @@ exec ros -Q -- $0 "$@"
        (setf *last-unhandled-error* nil)
        (cond ((and (consp ret)
 		   (typep (first ret) 'condition))
-	      (format t "~&Caught '~a' at the top level. Please report this.~%~a" 
+	      (format t "~&Caught '~a' at the top level. Please report this.~%~a"
 		      (first ret) (second ret))
 	      (setf *last-unhandled-error* ret))
 	     ;; we need to jump out of the event loop in order to hup
@@ -101,7 +101,7 @@ exec ros -Q -- $0 "$@"
 	     ((eq ret :hup-process)
 	      (apply 'execv (first (list argv)) (list argv)))
 	     ((eq ret :restart))
-	     (t 
+	     (t
 	      (run-hook *quit-hook*)
 	      ;; the number is the unix return code
 	      (return-from main 0))))))
