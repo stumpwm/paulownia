@@ -10,9 +10,9 @@
   :version "2.0.0"
   :maintainer "David Bjergaard <dbjergaard@gmail.com>"
   :license "GNU General Public License"
-  :description "A tiling, keyboard driven window manager" 
+  :description "A tiling, keyboard driven window manager"
   :serial t
-  :depends-on (:cl-ppcre 
+  :depends-on (:cl-ppcre
 	       #+sbcl :sb-posix
 	       :uiop
 	       :clx)
@@ -29,4 +29,3 @@
                ;; anything changes
                (:file "version")
 	       ))
-
