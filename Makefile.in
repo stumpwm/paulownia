@@ -15,10 +15,6 @@ all: paulownia # paulownia.info
 paulownia.info: paulownia.texi
 	makeinfo paulownia.texi
 
-dependencies:
-	ros use $(LISP)
-	ros run -S "@PAULOWNIA_ASDF_DIR@/paulownia.asd" -e "(ql:quickload :paulownia)"
-
 paulownia: $(FILES) paulownia.ros
 	ros use $(LISP)
 	ros build paulownia.ros
