@@ -29,6 +29,3 @@
                ;; anything changes
                (:file "version")
 	       ))
-
-(push #p"@PAULOWNIA_ASDF_DIR@/" asdf:*central-registry*)
-(ql:quickload :paulownia)

@@ -10,7 +10,7 @@ exec ros -Q -- $0 "$@"
 (setf asdf:*central-registry*
       (append (list (merge-pathnames "@PAULOWNIA_ASDF_DIR@/base/"))
 	      asdf:*central-registry*))
-(asdf:oos 'asdf:load-op 'paulownia)
+(ql:quickload :paulownia)
 
 (in-package :paulownia)
 (export '(*display*))

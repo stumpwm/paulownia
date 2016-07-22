@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(Stump Window Manager, esyscmd(grep :version paulownia.asd.in | cut -d\" -f2 | tr -d \\n),  dbjergaard@gmail.com, sabetts@gmail.com)
+AC_INIT(Stump Window Manager, esyscmd(grep :version paulownia.asd | cut -d\" -f2 | tr -d \\n),  dbjergaard@gmail.com, sabetts@gmail.com)
 
 AC_SUBST(MODULE_DIR)
 AC_SUBST(LISP)
@@ -57,6 +57,5 @@ fi
 
 # Checks for library functions.
 AC_OUTPUT(Makefile)
-AC_OUTPUT(paulownia.asd)
 AC_OUTPUT(paulownia.ros)
 AC_OUTPUT(paulownia-tests.asd)
