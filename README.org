@@ -27,7 +27,7 @@ of stumpwm's Achilles heels.
 * Why Paulownia?
 It seems like a strange name, stumpwm reminds me of a tree stump, the
 idea behind this is to burn stumpwm to the ground and grow it back up
-stronger and better than before.  If you google [[https://www.google.com/search?q%3Dphoenix%2Btree][phoenix tree]], the top
+stronger and better than before.  If you google [[https://www.google.com/search?q=phoenix%2Btree][phoenix tree]], the top
 hit is the wiki page describing the genus Paulownia. The wiki page
 actually draws a lot of analogies to the goals of this project, so the
 name was chosen.
